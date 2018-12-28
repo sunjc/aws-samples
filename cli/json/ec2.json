@@ -1,0 +1,27 @@
+{
+    "DryRun": false, 
+    "KeyName": "AWS Prod Key Pair",
+    "SecurityGroupIds": [
+        "sg-1361c577"
+    ],
+    "InstanceType": "m4.large", 
+    "Placement": {
+        "AvailabilityZone": "cn-north-1a", 
+        "Tenancy": "default"
+    }, 
+    "Monitoring": {
+        "Enabled": false
+    }, 
+    "DisableApiTermination": true, 
+    "InstanceInitiatedShutdownBehavior": "stop", 
+    "NetworkInterfaces": [
+        {
+            "DeviceIndex": 0,
+            "SubnetId": "subnet-d45208b1",
+            "PrivateIpAddress": "10.184.12.246",
+            "DeleteOnTermination": true,
+            "AssociatePublicIpAddress": false
+        }
+    ],
+    "EbsOptimized": false
+}

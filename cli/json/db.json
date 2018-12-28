@@ -1,0 +1,16 @@
+{
+    "DBInstanceIdentifier": "test",
+    "DBInstanceClass": "db.r3.large", 
+    "Port": 1521, 
+    "AvailabilityZone": "cn-north-1a", 
+    "DBSubnetGroupName": "test-db",
+    "MultiAZ": false, 
+    "PubliclyAccessible": false, 
+    "AutoMinorVersionUpgrade": true, 
+    "LicenseModel": "license-included", 
+    "DBName": "test",
+    "Engine": "oracle-se1", 
+    "OptionGroupName": "default:oracle-se1-11-2", 
+    "StorageType": "standard", 
+    "CopyTagsToSnapshot": true
+}

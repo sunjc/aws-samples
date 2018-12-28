@@ -1,0 +1,1 @@
+<powershell>Set-DnsClientServerAddress -InterfaceAlias "Ethernet 2" -ServerAddresses ("10.184.13.14")</powershell>
