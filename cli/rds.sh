@@ -31,8 +31,8 @@ restore() {
 echo_usage() {
   echo "Usage: $0 [delete|restore] [args ...]"
   echo "Commands:"
-  echo "delete [db-instance-identifier] Delete a DB instance"
-  echo "restore [db-instance-identifier] [vpc-security-group-ids] Create a new DB instance from a DB snapshot"
+  echo "  delete [db-instance-identifier] Delete a DB instance"
+  echo "  restore [db-instance-identifier] [vpc-security-group-ids] Create a new DB instance from a DB snapshot"
 }
 
 if test @$1 = @--help -o @$1 = @-h; then

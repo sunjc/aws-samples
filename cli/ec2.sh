@@ -208,27 +208,44 @@ attach_volume() {
   create_tags_with_name "${volume_id}" "${volume_name}" "${tags}"
 }
 
+# 关联弹性IP到Instance
+associate_address() {
+  instance_id=$(query_instance_id_by_name "$1")
+  aws ec2 associate-address --instance-id ${instance_id} --public-ip $2
+}
+
+# 更新NAT Instance路由
+replace_route() {
+  echo "update route table: $1"
+  route_table_id=$(query_route_table_id_by_name "$1")
+  nat_instance_id=$(query_instance_id_by_name "$2")
+  cidr=$3
+  aws ec2 replace-route --route-table-id ${route_table_id} --destination-cidr-block ${cidr} --instance-id ${nat_instance_id}
+}
+
 echo_usage() {
   echo "Usage: $0 [command] [args ...]"
   echo "Commands:"
-  echo "create-image [instance_name] [image_name] [tags] Create an AMI from an EC2 instance"
-  echo "delete-image [image_name] Delete image by name"
-  echo "start-instance [instance_name] Start an EC2 instance"
-  echo "start-instances [category_name] Start EC2 instances by category"
-  echo "stop-instance [instance_name] Stop an EC2 instance"
-  echo "stop-instances [category_name] Stop EC2 instances by category"
-  echo "reboot-instance [instance_name] Reboot an EC2 instance"
-  echo "reboot-instances [category_name] Reboot EC2 instances by category"
-  echo "terminate-instance [instance_name] Terminate an EC2 instance"
-  echo "terminate-instances [category_name] Terminate EC2 instances by category"
-  echo "run-instance [instance_name] [image_name] [options] Launch an instance using an AMI"
+  echo "  create-image [instance_name] [image_name] [tags] Create an AMI from an EC2 instance"
+  echo "  delete-image [image_name] Delete image by name"
+  echo "  start-instance [instance_name] Start an EC2 instance"
+  echo "  start-instances [category_name] Start EC2 instances by category"
+  echo "  stop-instance [instance_name] Stop an EC2 instance"
+  echo "  stop-instances [category_name] Stop EC2 instances by category"
+  echo "  reboot-instance [instance_name] Reboot an EC2 instance"
+  echo "  reboot-instances [category_name] Reboot EC2 instances by category"
+  echo "  terminate-instance [instance_name] Terminate an EC2 instance"
+  echo "  terminate-instances [category_name] Terminate EC2 instances by category"
+  echo "  run-instance [instance_name] [image_name] [options] Launch an instance using an AMI"
   echo "    Options:"
-  echo "    --device-snapshot-name One block device snapshot name"
-  echo "    --init-file an user data file"
-  echo "    --tags One  or more tags"
-  echo "create-snapshot [instance_name] [device] [snapshot_name] [tags] Creates a snapshot of the specified volume for an instance"
-  echo "delete-snapshot [snapshot_name] Deletes the specified snapshot"
-  echo "attach-volume [snapshot_name] [instance_name] [device] [tags] Create a volume from a snapshot, and then attach the volume to an instance"
+  echo "      --device-snapshot-name One block device snapshot name"
+  echo "      --init-file an user data file"
+  echo "      --tags One  or more tags"
+  echo "  create-snapshot [instance_name] [device] [snapshot_name] [tags] Creates a snapshot of the specified volume for an instance"
+  echo "  delete-snapshot [snapshot_name] Deletes the specified snapshot"
+  echo "  attach-volume [snapshot_name] [instance_name] [device] [tags] Create a volume from a snapshot, and then attach the volume to an instance"
+  echo "  associate-address [instance_name] [public_ip]  Associates an Elastic IP address with an instance"
+  echo "  replace-route [route_table_name] [nat_instance_name] [cidr] Replaces an existing route within a route table in a VPC"
 }
 
 if test @$1 = @--help -o @$1 = @-h; then
@@ -315,6 +332,12 @@ case "$1" in
     ;;
   attach-volume)
     attach_volume "$2" "$3" "$4" "$5"
+    ;;
+  associate-address)
+    associate_address "$2" "$3"
+    ;;
+  replace-route)
+    replace_route "$2" "$3" "$4"
     ;;
   *)
     exit 1
