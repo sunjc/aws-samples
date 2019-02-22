@@ -117,8 +117,8 @@ run_instance() {
     fi
   fi
 
-  echo "Create EC2 instance ${instance_name} from image ${image_name}"
   image_id=$(query_image_id_by_name "${image_name}")
+  echo "Create EC2 instance ${instance_name} from image ${image_name}(${image_id})"
 
   if [[ "$init_file" ]]; then
     instance_id=$(aws ec2 run-instances --image-id "${image_id}" ${block_device_mappings} --cli-input-json file://json/"${instance_name}".json \
@@ -295,6 +295,8 @@ case "$1" in
      exit 1
     fi
 
+    instance_name=$2
+    image_name=$3
     device_snapshot_name=""
     init_file=""
     tags=""
@@ -322,7 +324,7 @@ case "$1" in
     esac
     done
 
-    run_instance "$2" "$3" "${device_snapshot_name}" "${init_file}" "${tags}"
+    run_instance "${instance_name}" "${image_name}" "${device_snapshot_name}" "${init_file}" "${tags}"
     ;;
   create-snapshot)
     create_snapshot "$2" "$3" "$4" "$5"
