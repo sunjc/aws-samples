@@ -160,8 +160,34 @@ delete_snapshot() {
   fi
 }
 
-# 从快照创建卷并删除旧的重名卷，然后将卷连接到Instance的指定device
+# 创建gp2卷
+create_volume() {
+  name=$1
+  size=$2
+  tags=""
+
+  if [[ $3 ]]; then
+    tags=",$3"
+  fi
+
+  aws ec2 create-volume --availability-zone cn-north-1a --volume-type gp2 --size ${size} --tag-specifications  \
+     "ResourceType=volume,Tags=[{Key=Name,Value=${name}}${tags}]"
+}
+
+# 连接卷到Instance device
 attach_volume() {
+  volume_name=$1
+  instance_name=$2
+  device=$3
+
+  volume_id=$(query_volume_id_by_name ${volume_name})
+  instance_id=$(query_instance_id_by_name ${instance_name})
+
+  aws ec2 attach-volume --volume-id ${volume_id} --instance-id ${instance_id} --device ${device}
+}
+
+# 从快照创建卷并删除旧的重名卷，然后将卷连接到Instance device
+attach_volume_from_snapshot() {
   snapshot_name=$1
   instance_name=$2
   device=$3
@@ -243,7 +269,9 @@ echo_usage() {
   echo "      --tags One  or more tags"
   echo "  create-snapshot [instance_name] [device] [snapshot_name] [tags] Creates a snapshot of the specified volume for an instance"
   echo "  delete-snapshot [snapshot_name] Deletes the specified snapshot"
-  echo "  attach-volume [snapshot_name] [instance_name] [device] [tags] Create a volume from a snapshot, and then attach the volume to an instance"
+  echo "  create-volume [volume_name] [size] [tags]  Creates an EBS volume, e.g. 'create-volume test 20 "{Key=CCX,Value=DSC003},{Key=Project,Value=ASD}"'"
+  echo "  attach-volume [volume_name] [instance_name] [device] Attaches an EBS volume to a running or stopped instance"
+  echo "  attach-snapshot-volume [snapshot_name] [instance_name] [device] [tags] Create a volume from a snapshot, and then attach the volume to an instance"
   echo "  associate-address [instance_name] [public_ip]  Associates an Elastic IP address with an instance"
   echo "  replace-route [route_table_name] [nat_instance_name] [cidr] Replaces an existing route within a route table in a VPC"
 }
@@ -332,8 +360,14 @@ case "$1" in
   delete-snapshot)
     delete_snapshot "$2"
     ;;
+  create-volume)
+    create_volume "$2" "$3" "$4"
+    ;;
   attach-volume)
-    attach_volume "$2" "$3" "$4" "$5"
+    attach_volume "$2" "$3" "$4"
+    ;;
+  attach-snapshot-volume)
+    attach_volume_from_snapshot "$2" "$3" "$4" "$5"
     ;;
   associate-address)
     associate_address "$2" "$3"
